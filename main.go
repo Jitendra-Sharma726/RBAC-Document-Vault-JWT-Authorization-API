@@ -48,7 +48,28 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
     return
   }
 
-  user
+  user, exists := mockDB[creds.Username]
+  if !exists || user.Password != creds.Password {
+    http.Error(w, "Unauthorized", http.StatusUnauthorized)
+    return
+  }
+
+  // Construct JWT claims(username, role, exp)
+  claims := jwt.MapClaims{
+    "username":   user.Username,
+    "role":       user.Role,
+    "exp":        time.Now().Add(1 * time.Hour).Unix(),
+  }
+  token := jwt.NewWithClaims(jwt.SigninigMethodHS256, claims)
+
+  //Sign the token using jwtKey
+  tokenString, err  := token.SignedString(jwtKey)
+  if err != nil {
+     http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+     return
+  }
+
+  //
 
 
 
