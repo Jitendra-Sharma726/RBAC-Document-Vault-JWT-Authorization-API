@@ -69,8 +69,98 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
      return
   }
 
-  //
+  //Return the generated token as JSON
+  w.Header().Set("Content-Type", "application/json")
+  json.NewEncoder(w).Encode(map[string]string{
+       "token": tokenString,
+    })
+}
 
+// rbacMiddleware intercepts requests, validates JWTs, and enforces role boundaries
+func rbacMiddleware(allowedRoles []string, next http.HandlerFunc) http.HandlerFunc {
+    return func(w http.ResponseWriter, r *http.Request) {
+
+      //Extract the token from the Authorization header
+      authHeader := r.Header.Get("Authorization")
+      if authHeader == "" {
+        http.Error(w, "Missing Authorization Header", http.StatusUnauthorized)
+        return
+      }
+      tokenStr := strings.TrimPrefix(authHeader, "Bearer ")
+
+      //Parse and validate the JWT signature
+      token, err := jwt.Parse(tokenStr, func(token *jwt.Token) (interface{}, error) {
+        _, ok := token.Method(*jwt.SigningMethodHMAC);
+
+        if !ok {
+             return nil, fmt.Errorf("unexpected signing method")
+        }
+        return jwtKey, nil
+        })
+
+       if err != nil || !token.Valid {
+          http.Error(w, "Invalid or expired token", http.StatusUnauthorized)
+         return
+        }
+
+      //Extract the user's role from the token claims
+      claims, ok := token.Claims.(jwt.MapClaims)
+      if !ok {
+          http.Error(w, "Invalid token claims", http.StatusUnauthorized)
+          return
+      }
+
+      userRole, ok := claims["role"].(string)
+      if !ok {
+           http.Error(w, "Role not found in token", http.StatusUnauthorized)
+           return
+      }
+
+      //Deny access if the user's role is not in allowedRoles
+      hasPermission := false
+      for _, role := range allowedRoles {
+          if userRole == role {
+            hasPermission = true
+            break
+            }
+        }
+
+    if !hasPermission {
+         http.Error(w, "Forbidden: You do not have the required role to access this document.", http.StatusForbidden)
+         return
+    }
+
+    // Grant access to the requested document
+    next(w, r)
+  }
+}
+
+  func main() {
+    fmt.Println("=== RBAC Document Vault ===")
+    fmt.Println("Listening on port 8080...")
+
+    mux := http.NewServeMux()
+
+    //Public login endpoint
+    mux.HandleFunc("/login", LoginHandler)
+
+    //Wire up the router with RBAC middleware
+    mux.HandleFunc("/docs/public", rbacMiddleware([]string{"admin", "employee", "guest"}, PublicDocHandler))
+    
+
+
+
+
+
+
+
+
+
+
+
+        
+
+      
 
 
 
