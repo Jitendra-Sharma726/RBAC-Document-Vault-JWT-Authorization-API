@@ -146,7 +146,32 @@ func rbacMiddleware(allowedRoles []string, next http.HandlerFunc) http.HandlerFu
 
     //Wire up the router with RBAC middleware
     mux.HandleFunc("/docs/public", rbacMiddleware([]string{"admin", "employee", "guest"}, PublicDocHandler))
-    
+    mux.HandleFunc("/docs/internal", rbacMiddleware([]string{"admin", "employee"}, InternalDocHandler))
+    mux.HandleFunc("/docs/classified", rbacMiddleware([]string{"admin"}, ClassifiedDocHandler))
+
+    err := http.ListenAndServe(":8080", mux)
+    if err != nil {
+         log.Fatal("Server failed to start: ", err)
+    }
+}
+
+// === Protected Document Handlers (DO NOT MODIFY) ===
+func PublicDocHandler(w http.ResponseWriter, r *http.Request) {
+  w.WriteHeader(http.statusOK)
+  w.Write([]byte("PUBLIC: Welcome to the company, here is the handbook.\n"))
+}
+
+func InternalDocHandler(w http.ResponseWriter, r *http.Request) {
+  w.WriteHeader(http.StatusOK)
+  w.Write([]byte("INTERNAL: Q3 Financial Reports and Roadmap data.\n"))
+}
+
+func ClassifiedDocHandler(w http.ResponseWriter, r *http.Request) {
+    w.WriteHeader(http.StatusOK)
+    w.Write([]byte("CLASSIFIED: Admin access only. Operation Midnight architecture.\n"))
+}
+  
+  
 
 
 
