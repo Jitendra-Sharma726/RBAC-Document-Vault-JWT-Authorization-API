@@ -264,6 +264,54 @@
   }
 }
 
+// Access Protected Route (Requires JWT + Correct Role)
+  async function fetchDoc(tier) {
+    const token = localStorage.getItem('cipher_jwt');
+    const apiUrl = getBackendDomain() + "/docs/" + tier;
+
+
+    try {
+        const res = await fetch(apiUrl, {
+          method: 'GET',
+          // Attach JWT
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+
+      if (res.ok) {
+         const text = await res.text()
+         showMessage(`Access Denied (${res.status}): ${text}`, true);
+
+        // if token is completely invalid/expired, force logout
+         if (res.status === 401) {
+               localStorage.removeItem('cipher_jwt');
+               setTimeout(checkAuth, 2000);
+         }
+      }
+    } catch (error) {
+        showMessage("Network Error.", true);
+    }
+  }
+
+  //Secure Logout
+  function logout() {
+     //Clear local storage
+     localStorage.removeItem('cipher_jwt');
+     checkAuth();
+     showMessage("Logged out Securely. Token removed from browser.");
+  }
+
+  //Run auth check on page load
+  checkAuth();
+</script>
+
+</body>
+</html>
+
+
+  
+
+  
+
       
       
         
