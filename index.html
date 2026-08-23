@@ -110,7 +110,84 @@
     .btn-logout { background-color: #555; color: white; }
     .btn-logout:hover { background-color: #444; }
 
-    #message-bo
+    #message-box {
+      margin-top: 20px;
+      padding: 10px;
+      border-radius: 5px;
+      font-size: 0.9em;
+      display: none; 
+      word-wrap: break-word;
+    }
+
+    .success { background-color: rgba(76, 175, 80, 0.1); color: #4caf50; border: 1px solid #4caf50; }
+    .error { background-color: rgba(244, 67, 54, 0.1); color: #f44336; border: 1px solid #f44336; }
+
+
+    #auth-section { display: block; }
+    #vault-section { display: none; }
+
+
+    @media (max-width: 480px) {
+      .vault-card {
+        padding: 20px;
+      }
+
+      h2 {
+        font-size: 1.4rem;
+      }
+
+      .hint-box {
+        font-size: 0.8rem;
+        padding: 8px;
+      }
+
+      button {
+        padding: 12px;
+        font-size: 15px;
+      }
+      #token-display {
+         font-size: 10px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+<div class="vault-card">
+  <h2> RBAC Document Vault</h2>
+
+  <div id="auth-section">
+    <div class="hint-box">
+      <strong>Test Accounts (Password: password123)</strong><br>
+      . <b>alice</b> (Role: Admin)<br>
+      . <b>bob</b>   (Role: Employee)<br>
+      . <b>charlie</b> (Role: Guest)
+    </div>
+
+    <div class="input-group">
+      <input type"text" id="username" placeholder="Username" autocomplete="off">
+      <input type="password" id="password" placeholder="Password">
+    </div>
+    <button class="btn-primary" onclick="login()">Login to Vault</button>
+  </div>
+
+  
+
+
+    
+      
+
+
+
+
+
+
+
+
+
+      
+  
+</body>
     
 
     
